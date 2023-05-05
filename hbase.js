@@ -8,7 +8,9 @@ const table = client.table('weather');
 let count = 0;
 
 let addRecord = () => { 
-    fs.createReadStream("./weatherHistory.csv")
+    let rows = [];
+    let count = 1;
+    fs.createReadStream("./newweatherhistory.csv")
     .pipe(
         parse({
             delimiter: ",",
@@ -17,25 +19,23 @@ let addRecord = () => {
         })
     )
     .on("data", function (data) {
-        let row = table.row();
         let thisRow = [
-            { key: `${count}`, column: 'date:date', $: data.FormattedDate },
-            { key: `${count}`, column: 'summaries:summary', $: data.Summary },
-            { key: `${count}`, column: 'summaries:daily_summary', $: data.DailySummary },
-            { key: `${count}`, column: 'weather:precip', $: data.PrecipType },
-            { key: `${count}`, column: 'weather:temp', $: data.Temperature },
-            { key: `${count}`, column: 'weather:humidity', $: data.Humidity },
-            { key: `${count}`, column: 'weather:apparent_temp', $: data.ApparentTemperature },
-            { key: `${count}`, column: 'weather:wind_speed', $: data.WindSpeed },
-            { key: `${count}`, column: 'weather:visibility', $: data.Visibility },
-        ]
-        row.put(thisRow, (err, suc) => {
-            console.log(err + suc);
-        })
+            { key: `${count}`, column: 'summary:date', $: `${data.FormattedDate}` },
+            { key: `${count}`, column: 'summary:summary', $: `${data.Summary}` },
+            { key: `${count}`, column: 'summary:daily_summary', $: `${data.DailySummary}` },
+            { key: `${count}`, column: 'summary:precip', $: `${data.PrecipType}` },  
+        ];
+        rows = rows.concat(thisRow);
         count++;
     })
     .on("error", function (error) {
         console.log(error.message);
+    })
+    .on('close', () => {
+        let row = table.row();
+        row.put(rows, (err, res) => {
+            console.log(err);
+        })
     });
 }
 
@@ -50,29 +50,23 @@ let testConn = () => {
     })  
 }
 
-let add = () => {
-    
+let hbaseQuery = (amount) => {
     let rows = [];
-    let row = table.row();
-    for (let i = 0; i < 12000; i++) {
-        let now = Date.now() + i;
+    for (let i = 0; i < amount; i++) {
+        let now = Date.now();
         let thisRow = [
-            { key: `${now}`, column: 'date:date', $: `${now}` },
-            { key: `${now}`, column: 'summaries:summary', $: `${now}` },
-            { key: `${now}`, column: 'summaries:daily_summary', $: `${now}` },
-            { key: `${now}`, column: 'weather:precip', $: `${now}` },
+            { key: `${now}`, column: 'summary:date', $: `${now}` },
+            { key: `${now}`, column: 'summary:summary', $: `${now}` },
+            { key: `${now}`, column: 'summary:daily_summary', $: `${now}` },
+            { key: `${now}`, column: 'summary:precip', $: `${now}` },
         ]
         rows = rows.concat(thisRow);
+        while (Date.now() == now){};
     }
-    let start = Date.now();
-    row.put(rows, (err, res) => {
-        console.log(res);
-        console.log(Date.now() - start);
-    })
+    return rows;
 }
 
-testConn();
-
+module.exports = hbaseQuery;
 
 
 

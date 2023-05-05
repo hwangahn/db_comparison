@@ -22,22 +22,19 @@ let search = () => {
     })
 }
 
-let add = () => {
-    let query = `INSERT INTO newweatherhistory (FormattedDate, Summary, Precip, DailySummary)
+let mysqlQuery = (amount) => {
+    let query = `INSERT INTO weather (date, summary, precip, dailysummary)
                     VALUES`
-    for (let i = 0; i < 12000; i++) {
+    for (let i = 0; i < amount; i++) {
         let now = Date.now() + i;
         query = query.concat(`('today', ${(now % 3) + 1}, ${(now % 3) + 1}, ${(now % 3) + 1})`);
-        if (i == 11999) {
+        if (i == amount - 1) {
             query = query.concat(';');
         } else {
             query = query.concat(',');
         }
     }
-    let start = Date.now();
-    connection.query(query, (err, res) => {
-        console.log(Date.now() - start);
-    })
+    return query;
 }
 
-add();
+module.exports = mysqlQuery;

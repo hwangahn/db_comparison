@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+
+<header>
+    <title>Test</title>
+    <script
+        src="https://code.jquery.com/jquery-3.6.4.min.js"
+        integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8="
+        crossorigin="anonymous">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+</header>
+
+<body>
+    <div>
+        <button id="insert">Test insert</button>
+        <button id="select">Test select</button>
+    </div>
+    <canvas id="result" style="height: 400px;"></canvas>
+    <div id="record"></div>
+</body>
+
+<script>
+    var resultChart;
+    $('#insert').on('click', () => {
+            fetch('/insert', {
+            method: 'get'
+        })
+        .then((res) => { return res.json() })
+        .then((data) => { 
+            console.log(data);
+            $('#record').empty();
+            if (resultChart) {
+                resultChart.destroy();
+            }
+            resultChart = new Chart("result", {
+                type: "bar",
+                data: {
+                    labels: [3000, 6000, 12000, 15000],
+                    datasets: [
+                        {
+                            label: 'HBase',
+                            backgroundColor: 'red',
+                            data: [data.hbaseInsert_3000_time, data.hbaseInsert_6000_time, data.hbaseInsert_12000_time, data.hbaseInsert_15000_time]
+                        },
+                        {
+                            label: 'MySQL',
+                            backgroundColor: 'blue',
+                            data: [data.mysqlInsert_3000_time, data.mysqlInsert_6000_time, data.mysqlInsert_12000_time, data.mysqlInsert_15000_time]
+                        }
+
+                    ]
+                },
+                options: {
+                    responsive: false,
+                    legend: {display: true},
+                    title: {
+                        display: true,
+                        text: "Insert execute time"
+                    },
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            });
+        });
+    })
+
+    $('#select').on('click', () => {
+            fetch('/select', {
+            method: 'get'
+        })
+        .then((res) => { return res.json() })
+        .then((data) => { 
+            console.log(data);
+            if (resultChart) {
+                resultChart.destroy();
+            }
+            $('#record').empty();
+            $(`<p>Date: ${data.record.date}<p>`).appendTo('#record');
+            $(`<p>Precipitation: ${data.record.precip}<p>`).appendTo('#record');
+            $(`<p>Summary: ${data.record.summary}<p>`).appendTo('#record');
+            resultChart = new Chart("result", {
+                type: "bar",
+                data: {
+                    labels: ['HBase', 'MySQL'],
+                    datasets: [
+                        {
+                            backgroundColor: ['red', 'blue'],
+                            data: [data.hbaseTime, data.mysqlTime]
+                        }
+                    ]
+                },
+                options: {
+                    legend: {display: false},
+                    title: {
+                        display: true,
+                        text: "Select execute time"
+                    },
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            });
+
+        });
+    })
+</script>
+
