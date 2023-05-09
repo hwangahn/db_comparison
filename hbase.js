@@ -20,7 +20,7 @@ let addRecord = () => {
     )
     .on("data", function (data) {
         let thisRow = [
-            { key: `${count}`, column: 'summary:date', $: `${data.FormattedDate}` },
+            { key: `${count}`, column: 'date:date', $: `${data.FormattedDate}` },
             { key: `${count}`, column: 'summary:summary', $: `${data.Summary}` },
             { key: `${count}`, column: 'summary:daily_summary', $: `${data.DailySummary}` },
             { key: `${count}`, column: 'summary:precip', $: `${data.PrecipType}` },  
@@ -55,7 +55,7 @@ let hbaseQuery = (amount) => {
     for (let i = 0; i < amount; i++) {
         let now = Date.now();
         let thisRow = [
-            { key: `${now}`, column: 'summary:date', $: `${now}` },
+            { key: `${now}`, column: 'date:date', $: `${now}` },
             { key: `${now}`, column: 'summary:summary', $: `${now}` },
             { key: `${now}`, column: 'summary:daily_summary', $: `${now}` },
             { key: `${now}`, column: 'summary:precip', $: `${now}` },
